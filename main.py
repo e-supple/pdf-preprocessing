@@ -3,7 +3,7 @@ from typing import List
 import pdfplumber
 
 
-def extract_pdf_text_with_layout(pdf_path: str):
+def extract_pdf_text_with_layout(pdf_path: str)->List:
     structured_text = []
     
     with pdfplumber.open(pdf_path) as pdf:
@@ -14,11 +14,12 @@ def extract_pdf_text_with_layout(pdf_path: str):
 
             for word in words:
                 # Each word dict may include text, x0, x1, top, bottom, and sometimes font size info.
-                # (Note: Not all PDFs provide font size info directly)
+                # (PDF may not provide this info)
                 text = word.get("text", "")
-                # Here you might inspect 'fontname' or other keys if available:
+                # inspect other keys if available:
                 font_info = word.get("fontname", "default")
-                # Add the text along with some metadata to your list
+                # add text and metadata
+                
                 page_content.append({
                     "text": text,
                     "font": font_info,
@@ -41,7 +42,7 @@ def save_text(data: List, filename: str):
         f.write(data)
 
 
-def save_structured_text_with_metadata(structured_text, filename):
+def save_structured_text_with_metadata(structured_text:List, filename:str):
     """
     Saves structured text to a file, including a metadata section at the end of each page.
 
@@ -74,17 +75,9 @@ def save_structured_text_with_metadata(structured_text, filename):
             f.write("\n\n")  # Extra newline to separate pages
 
 
-def preprocess(data):
-    with pdfplumber.open("medical_record.pdf") as pdf:
-        text = "\n".join(page.extract_text()
-                         for page in pdf.pages if page.extract_text())
-    # Send `text` to the LLM via OpenWebUI input
-
-
 def main():
-    # C:\Users\esupple\Documents\My Documents\pdf-preprocessing\record.pdf
     pdf_file = os.path.join(os.path.expanduser(
-        "~"), "Documents", "My Documents", "pdf-preprocessing", "record.pdf")
+        "~"), "Documents", "record.pdf") # set file path
     data = extract_pdf_text_with_layout(pdf_file)
     print(data[:100]) # debug
     save_structured_text_with_metadata(data, "record")
